@@ -150,12 +150,13 @@
 
     <script>
         // ================= CONFIGURACIÓN DE TU API =================
-        const API_KEY = "692ff3dbfba2a4ddb2f7945f8f050ee5"; // <-- Pega aquí tu llave de API-Sports
-        const PARTIDO_ID = "1505456";       // <-- Pega aquí el ID del partido de Champions del día
+        const API_KEY = "692ff3dbfba2a4ddb2f7945f8f050ee5"; // Tu llave de API-Sports
+        const PARTIDO_ID = "1514194";                       // ID del partido que quieres monitorear
         // ===========================================================
 
         async function obtenerMarcadorEnVivo() {
-            const url = `GET https://v3.football.api-sports.io/fixtures?live=all`;
+            // CORRECCIÓN: Eliminamos el "GET " y cambiamos "live=all" por "id=PARTIDO_ID"
+            const url = `https://v3.football.api-sports.io/fixtures?id=${PARTIDO_ID}`;
 
             try {
                 const respuesta = await fetch(url, {
@@ -171,12 +172,13 @@
                 if (datos.response && datos.response.length > 0) {
                     const partido = datos.response[0];
 
-                    // 1. Nombre de la Liga
+                    // 1. Nombre de la Liga / Competición
                     document.getElementById('competicion').innerText = `${partido.league.name} - ${partido.league.round}`;
 
                     // 2. Datos Local
                     document.getElementById('nombre-local').innerText = partido.teams.home.name;
                     document.getElementById('logo-local').src = partido.teams.home.logo;
+                    // Si el partido no ha empezado, el valor de goles es null; lo convertimos a 0
                     document.getElementById('goles-local').innerText = partido.goals.home !== null ? partido.goals.home : 0;
 
                     // 3. Datos Visitante
@@ -185,45 +187,54 @@
                     document.getElementById('goles-visitante').innerText = partido.goals.away !== null ? partido.goals.away : 0;
 
                     // 4. Tiempo y Estado del partido
-                    const estado = partido.fixture.status.short; // FT (Terminado), 1H, 2H (En vivo), NS (No empezado)
+                    const estado = partido.fixture.status.short; // FT, 1H, 2H, HT, NS, etc.
                     const tiempoActual = partido.fixture.status.elapsed; // Minuto actual
 
                     const tiempoElemento = document.getElementById('tiempo-partido');
                     const barraVivo = document.getElementById('barra-vivo');
                     const estadoTexto = document.getElementById('estado-partido');
 
-                    if (estado === "NS") {
+                    // Lógica de estados de API-Football
+                    if (estado === "NS") { 
+                        // No Empezado (Not Started)
                         tiempoElemento.innerText = "00:00";
                         estadoTexto.innerText = "Por empezar";
+                        tiempoElemento.style.color = "#9aa0a6";
                         barraVivo.style.display = "none";
                     } else if (estado === "1H" || estado === "2H" || estado === "HT") {
-                        tiempoElemento.innerText = estado === "HT" ? "F.T. (MT)" : `${tiempoActual}'`;
+                        // En vivo (Primera mitad, Segunda mitad o Entretiempo)
+                        tiempoElemento.innerText = estado === "HT" ? "MT" : `${tiempoActual}'`;
                         estadoTexto.innerText = estado === "HT" ? "Medio Tiempo" : "EN VIVO";
-                        tiempoElemento.style.color = "#81c995"; // Verde Google
+                        tiempoElemento.style.color = "#81c995"; // Verde Google Live
                         barraVivo.style.display = "block";
                     } else if (estado === "FT") {
+                        // Finalizado (Full Time)
                         tiempoElemento.innerText = "Fin";
                         estadoTexto.innerText = "Partido Terminado";
                         tiempoElemento.style.color = "#ffffff";
                         barraVivo.style.display = "none";
                     } else {
+                        // Otros estados (Cancelado, Suspendido, Penales, etc.)
                         tiempoElemento.innerText = "--:--";
+                        estadoTexto.innerText = partido.fixture.status.long;
                         barraVivo.style.display = "none";
                     }
 
                 } else {
-                    console.error("No se encontraron datos para el partido ID:", PARTIDO_ID);
+                    console.warn("No se encontraron datos para el partido ID:", PARTIDO_ID);
+                    document.getElementById('competicion').innerText = "Partido no encontrado o ID incorrecto";
                 }
 
             } catch (error) {
                 console.error("Error al conectar con la API de fútbol:", error);
+                document.getElementById('competicion').innerText = "Error de conexión";
             }
         }
 
-        // Ejecutar inmediatamente al abrir la pantalla
+        // Ejecutar inmediatamente al cargar la página
         obtenerMarcadorEnVivo();
 
-        // Actualizar automáticamente cada 60 segundos (60000 ms) para no agotar el plan gratis
+        // Actualizar automáticamente cada 60 segundos
         setInterval(obtenerMarcadorEnVivo, 60000);
     </script>
 </body>
