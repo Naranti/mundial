@@ -35,7 +35,7 @@
 
         .liga-header {
             font-size: 4vh;
-            color: #9aa0a6;
+            color: #4a2d16;
             font-weight: 400;
             text-align: left;
             margin-bottom: 2vh;
@@ -69,7 +69,7 @@
         .nombre-equipo {
             font-size: 5vh;
             font-weight: 500;
-            color: #ffffff;
+            color: #201308;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -79,7 +79,7 @@
         .goles {
             font-size: 22vh;
             font-weight: 400;
-            color: #ffffff;
+            color: #201308;
             width: 15%;
             text-align: center;
             line-height: 1;
@@ -96,7 +96,7 @@
         .minuto {
             font-size: 7vh;
             font-weight: 700;
-            color: #81c995;
+            color: #134225;
             letter-spacing: 0.1vw;
             text-align: center;
         }
@@ -104,7 +104,7 @@
         .live-bar {
             width: 4vw;
             height: 0.8vh;
-            background-color: #81c995;
+            background-color: #134225;
             margin-top: 1.5vh;
             border-radius: 4px;
         }
@@ -112,7 +112,7 @@
         /* Estado cuando el partido no ha empezado o terminó */
         .status-bar {
             font-size: 3vh;
-            color: #9aa0a6;
+            color: #4a2d16;
             margin-top: 1vh;
         }
     </style>
@@ -199,19 +199,19 @@
                         // No Empezado (Not Started)
                         tiempoElemento.innerText = "00:00";
                         estadoTexto.innerText = "Por empezar";
-                        tiempoElemento.style.color = "#9aa0a6";
+                        tiempoElemento.style.color = "#4a2d16";
                         barraVivo.style.display = "none";
                     } else if (estado === "1H" || estado === "2H" || estado === "HT") {
                         // En vivo (Primera mitad, Segunda mitad o Entretiempo)
                         tiempoElemento.innerText = estado === "HT" ? "MT" : `${tiempoActual}'`;
                         estadoTexto.innerText = estado === "HT" ? "Medio Tiempo" : "EN VIVO";
-                        tiempoElemento.style.color = "#81c995"; // Verde Google Live
+                        tiempoElemento.style.color = "#134225";
                         barraVivo.style.display = "block";
                     } else if (estado === "FT") {
                         // Finalizado (Full Time)
                         tiempoElemento.innerText = "Fin";
                         estadoTexto.innerText = "Partido Terminado";
-                        tiempoElemento.style.color = "#ffffff";
+                        tiempoElemento.style.color = "#201308";
                         barraVivo.style.display = "none";
                     } else {
                         // Otros estados (Cancelado, Suspendido, Penales, etc.)
