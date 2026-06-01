@@ -155,7 +155,7 @@
         // ===========================================================
 
         async function obtenerMarcadorEnVivo() {
-            const url = `https://v3.football.api-sports.io/fixtures?id=${PARTIDO_ID}`;
+            const url = `GET https://v3.football.api-sports.io/fixtures?live=all`;
 
             try {
                 const respuesta = await fetch(url, {
