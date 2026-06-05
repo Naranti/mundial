@@ -156,6 +156,30 @@
         const PARTIDO_ID = "1528284";                       // ID del partido que quieres monitorear
         // ===========================================================
 
+        function traducirTextoBase(texto) {
+            if (!texto) return "";
+
+            return texto
+                .replace(/Group Stage/gi, "Fase de grupos")
+                .replace(/Round of 16/gi, "Octavos de final")
+                .replace(/Quarter-finals|Quarterfinals/gi, "Cuartos de final")
+                .replace(/Semi-finals|Semifinals/gi, "Semifinales")
+                .replace(/Third place|3rd Place/gi, "Tercer lugar")
+                .replace(/Final/gi, "Final")
+                .replace(/Play-offs|Playoffs/gi, "Eliminatoria")
+                .replace(/Relegation/gi, "Descenso")
+                .replace(/Apertura/gi, "Apertura")
+                .replace(/Clausura/gi, "Clausura")
+                .replace(/Matchday/gi, "Jornada")
+                .replace(/Regular Season/gi, "Temporada regular");
+        }
+
+        function traducirCompeticion(nombreLiga, ronda) {
+            const ligaTraducida = traducirTextoBase(nombreLiga);
+            const rondaTraducida = traducirTextoBase(ronda);
+            return `${ligaTraducida} - ${rondaTraducida}`;
+        }
+
         async function obtenerMarcadorEnVivo() {
             // CORRECCIÓN: Eliminamos el "GET " y cambiamos "live=all" por "id=PARTIDO_ID"
             const url = `https://v3.football.api-sports.io/fixtures?id=${PARTIDO_ID}`;
@@ -175,7 +199,7 @@
                     const partido = datos.response[0];
 
                     // 1. Nombre de la Liga / Competición
-                    document.getElementById('competicion').innerText = `${partido.league.name} - ${partido.league.round}`;
+                    document.getElementById('competicion').innerText = traducirCompeticion(partido.league.name, partido.league.round);
 
                     // 2. Datos Local
                     document.getElementById('nombre-local').innerText = partido.teams.home.name;
