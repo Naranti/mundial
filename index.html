@@ -34,12 +34,12 @@
         }
 
         .liga-header {
-        font-size: 15vh;
-        color: #ffffff;
-        font-weight: 700; /* <-- Cambiado a 700 para ponerlo en NEGRITA */
-        text-align: center; /* <-- Opcional: centrado queda mejor con tamaños grandes */
-        margin-bottom: 2vh;
-    }
+            font-size: 15vh;
+            color: #ffffff;
+            font-weight: 700; /* <-- Cambiado a 700 para ponerlo en NEGRITA */
+            text-align: center; /* <-- Opcional: centrado queda mejor con tamaños grandes */
+            margin-bottom: 2vh;
+        }
 
         .partido-box {
             display: flex;
@@ -160,8 +160,17 @@
             if (!texto) return "";
 
             return texto
+                .replace(/World Cup/gi, "Copa del Mundo")
+                .replace(/International Friendlies?/gi, "Amistosos internacionales")
+                .replace(/Friendlies?/gi, "Amistosos")
+                .replace(/Nations League/gi, "Liga de Naciones")
+                .replace(/Qualification|Qualifiers?/gi, "Clasificación")
+                .replace(/Women/gi, "Femenil")
+                .replace(/Men/gi, "Varonil")
                 .replace(/Group Stage/gi, "Fase de grupos")
+                .replace(/Group\s+([A-Z])/gi, "Grupo $1")
                 .replace(/Round of 16/gi, "Octavos de final")
+                .replace(/Round\s*(\d+)/gi, "Ronda $1")
                 .replace(/Quarter-finals|Quarterfinals/gi, "Cuartos de final")
                 .replace(/Semi-finals|Semifinals/gi, "Semifinales")
                 .replace(/Third place|3rd Place/gi, "Tercer lugar")
@@ -171,7 +180,9 @@
                 .replace(/Apertura/gi, "Apertura")
                 .replace(/Clausura/gi, "Clausura")
                 .replace(/Matchday/gi, "Jornada")
-                .replace(/Regular Season/gi, "Temporada regular");
+                .replace(/Regular Season/gi, "Temporada regular")
+                .replace(/Knockout Stage/gi, "Fase eliminatoria")
+                .replace(/Preliminary Round/gi, "Ronda preliminar");
         }
 
         function traducirCompeticion(nombreLiga, ronda) {
