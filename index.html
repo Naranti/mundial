@@ -123,7 +123,7 @@
 <body>
 
     <div class="marcador-responsive">
-        <div class="liga-header" id="competicion">Mex vs Serb</div>
+        <div class="liga-header" id="competicion">Titulo marcador..</div>
 
         <div class="partido-box">
 
@@ -153,7 +153,7 @@
     <script>
         // ================= CONFIGURACIÓN DE TU API =================
         const API_KEY = "692ff3dbfba2a4ddb2f7945f8f050ee5"; // Tu llave de API-Sports
-        const PARTIDO_ID = "1528284";                       // ID del partido que quieres monitorear
+        const PARTIDO_ID = "1548333";                       // ID del partido que quieres monitorear
         // ===========================================================
 
         function traducirTextoBase(texto) {
@@ -161,18 +161,31 @@
 
             return texto
                 .replace(/World Cup/gi, "Copa del Mundo")
+                .replace(/UEFA/gi, "UEFA")
+                .replace(/FIFA/gi, "FIFA")
+                .replace(/CONCACAF/gi, "CONCACAF")
+                .replace(/CONMEBOL/gi, "CONMEBOL")
                 .replace(/International Friendlies?/gi, "Amistosos internacionales")
                 .replace(/Friendlies?/gi, "Amistosos")
                 .replace(/Nations League/gi, "Liga de Naciones")
+                .replace(/Champions League/gi, "Liga de Campeones")
+                .replace(/Europa League/gi, "Liga Europa")
+                .replace(/Conference League/gi, "Liga Conferencia")
+                .replace(/Super Cup/gi, "Supercopa")
+                .replace(/Cup/gi, "Copa")
+                .replace(/League/gi, "Liga")
                 .replace(/Qualification|Qualifiers?/gi, "Clasificación")
                 .replace(/Women/gi, "Femenil")
                 .replace(/Men/gi, "Varonil")
                 .replace(/Group Stage/gi, "Fase de grupos")
                 .replace(/Group\s+([A-Z])/gi, "Grupo $1")
+                .replace(/1st Half/gi, "Primer tiempo")
+                .replace(/2nd Half/gi, "Segundo tiempo")
                 .replace(/Round of 16/gi, "Octavos de final")
                 .replace(/Round\s*(\d+)/gi, "Ronda $1")
                 .replace(/Quarter-finals|Quarterfinals/gi, "Cuartos de final")
                 .replace(/Semi-finals|Semifinals/gi, "Semifinales")
+                .replace(/Grand Final/gi, "Gran final")
                 .replace(/Third place|3rd Place/gi, "Tercer lugar")
                 .replace(/Final/gi, "Final")
                 .replace(/Play-offs|Playoffs/gi, "Eliminatoria")
@@ -181,13 +194,23 @@
                 .replace(/Clausura/gi, "Clausura")
                 .replace(/Matchday/gi, "Jornada")
                 .replace(/Regular Season/gi, "Temporada regular")
+                .replace(/Stage\s*(\d+)/gi, "Etapa $1")
                 .replace(/Knockout Stage/gi, "Fase eliminatoria")
-                .replace(/Preliminary Round/gi, "Ronda preliminar");
+                .replace(/Preliminary Round/gi, "Ronda preliminar")
+                .replace(/\s*-\s*/g, " - ")
+                .replace(/\s{2,}/g, " ")
+                .trim();
         }
 
         function traducirCompeticion(nombreLiga, ronda) {
             const ligaTraducida = traducirTextoBase(nombreLiga);
             const rondaTraducida = traducirTextoBase(ronda);
+
+            if (!ligaTraducida && !rondaTraducida) return "";
+            if (!rondaTraducida) return ligaTraducida;
+            if (!ligaTraducida) return rondaTraducida;
+            if (ligaTraducida.toLowerCase() === rondaTraducida.toLowerCase()) return ligaTraducida;
+
             return `${ligaTraducida} - ${rondaTraducida}`;
         }
 
