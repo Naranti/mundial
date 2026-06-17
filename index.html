@@ -117,10 +117,99 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* ==================== ANIMACIÓN DE GOL ==================== */
+
+        /* Capa de fondo que cubre toda la pantalla */
+        .gol-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(0,80,40,0.92) 0%, rgba(0,40,20,0.97) 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Clase que activa la visibilidad del overlay */
+        .gol-overlay.visible {
+            opacity: 1;
+        }
+
+        /* Texto principal ¡GOOOOL! */
+        .gol-titulo {
+            font-size: 22vh;
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            text-shadow:
+                0 0 4vh rgba(255,255,255,0.6),
+                0 0 8vh rgba(255,220,0,0.5);
+            animation: gol-pulso 0.6s ease-in-out infinite alternate;
+            line-height: 1;
+        }
+
+        /* Texto secundario con el nombre del equipo */
+        .gol-equipo {
+            font-size: 8vh;
+            font-weight: 600;
+            color: #ffd700;
+            text-align: center;
+            margin-top: 2vh;
+            text-shadow: 0 0 3vh rgba(255,215,0,0.7);
+        }
+
+        /* Contenedor de los balones animados */
+        .gol-balones {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9998;
+        }
+
+        /* Cada balón individual */
+        .balon {
+            position: absolute;
+            bottom: -15vh;
+            font-size: 8vh;
+            animation: balon-saltar 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            opacity: 0;
+        }
+
+        /* Animación de pulso del texto GOOOOL */
+        @keyframes gol-pulso {
+            from { transform: scale(1);   }
+            to   { transform: scale(1.06); }
+        }
+
+        /* Animación de cada balón saltando */
+        @keyframes balon-saltar {
+            0%   { bottom: -15vh; opacity: 0; transform: rotate(0deg)   scale(0.5); }
+            20%  { opacity: 1; }
+            60%  { bottom: 70vh;  opacity: 1; transform: rotate(540deg) scale(1.1); }
+            80%  { bottom: 55vh;  opacity: 1; transform: rotate(720deg) scale(0.95); }
+            100% { bottom: 65vh;  opacity: 0; transform: rotate(900deg) scale(1); }
+        }
+        /* =========================================================== */
     </style>
 </head>
 
 <body>
+
+    <!-- ==================== OVERLAY DE CELEBRACIÓN DE GOL ==================== -->
+    <!-- Este elemento se activa dinámicamente cuando se detecta un gol -->
+    <div class="gol-overlay" id="gol-overlay">
+        <div class="gol-titulo">¡GOOOOL!</div>
+        <div class="gol-equipo" id="gol-nombre-equipo">de ...</div>
+    </div>
+    <!-- Contenedor de balones animados (se rellena por JS) -->
+    <div class="gol-balones" id="gol-balones"></div>
+    <!-- =========================================================================== -->
 
     <div class="marcador-responsive">
         <div class="liga-header" id="competicion">Titulo marcador..</div>
@@ -154,7 +243,16 @@
         // ================= CONFIGURACIÓN DE TU API =================
         const API_KEY = "692ff3dbfba2a4ddb2f7945f8f050ee5"; // Tu llave de API-Sports
         const PARTIDO_ID = "1489388";                       // ID del partido que quieres monitorear
+        const INTERVALO_ACTUALIZACION = 15000;               // Intervalo de actualización en milisegundos
         // ===========================================================
+
+        // ================= VARIABLES PARA DETECCIÓN DE GOLES =================
+        // Guardan el marcador de la última actualización para comparar cambios
+        let golesLocalAnterior     = null;
+        let golesVisitanteAnterior = null;
+        let marcadorInicializado   = false; // Evita la animación en la primera carga
+        let animacionActiva        = false; // Evita que dos animaciones se pisen
+        // ======================================================================
 
         function traducirTextoBase(texto) {
             if (!texto) return "";
@@ -214,6 +312,97 @@
             return `${ligaTraducida} - ${rondaTraducida}`;
         }
 
+        // ================= FUNCIÓN: LANZAR ANIMACIÓN DE GOL =================
+        /**
+         * Muestra el overlay de gol con el nombre del equipo que anotó
+         * y anima varios balones de fútbol saltando en pantalla.
+         * @param {string} nombreEquipo - Nombre del equipo que anotó
+         */
+        function lanzarAnimacionGol(nombreEquipo) {
+            if (animacionActiva) return; // No interrumpir si ya hay una animación en curso
+            animacionActiva = true;
+
+            // Actualizar texto del equipo que anotó
+            const overlay   = document.getElementById('gol-overlay');
+            const contenedor = document.getElementById('gol-balones');
+            document.getElementById('gol-nombre-equipo').innerText = `de ${nombreEquipo}`;
+
+            // Mostrar el overlay con fade-in
+            overlay.classList.add('visible');
+
+            // Limpiar balones anteriores
+            contenedor.innerHTML = '';
+
+            // Crear varios balones en posiciones y tiempos distintos
+            const totalBalones = 12;
+            for (let i = 0; i < totalBalones; i++) {
+                const balon = document.createElement('span');
+                balon.classList.add('balon');
+                balon.textContent = '⚽';
+
+                // Posición horizontal aleatoria
+                balon.style.left = `${5 + Math.random() * 88}vw`;
+
+                // Tamaño ligeramente variado
+                balon.style.fontSize = `${6 + Math.random() * 5}vh`;
+
+                // Retraso escalonado para que no salgan todos a la vez
+                balon.style.animationDelay = `${i * 0.18}s`;
+
+                // Duración ligeramente variable para naturalidad
+                balon.style.animationDuration = `${1.0 + Math.random() * 0.5}s`;
+
+                contenedor.appendChild(balon);
+            }
+
+            // Ocultar overlay y limpiar balones después de 4.5 segundos
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    contenedor.innerHTML = '';
+                    animacionActiva = false;
+                }, 350); // Esperar el fade-out antes de limpiar
+            }, 4500);
+        }
+        // ======================================================================
+
+        // ================= FUNCIÓN: DETECTAR GOL =================
+        /**
+         * Compara el marcador actual con el anterior y dispara la animación
+         * si algún equipo aumentó sus goles.
+         * @param {number} golesLocalActual     - Goles actuales del local
+         * @param {number} golesVisitanteActual - Goles actuales del visitante
+         * @param {string} nombreLocal          - Nombre del equipo local
+         * @param {string} nombreVisitante      - Nombre del equipo visitante
+         */
+        function detectarGol(golesLocalActual, golesVisitanteActual, nombreLocal, nombreVisitante) {
+            // No disparar si los goles vienen como null
+            if (golesLocalActual === null || golesVisitanteActual === null) return;
+
+            // Primera carga: solo guardar el marcador actual sin animar
+            if (!marcadorInicializado) {
+                golesLocalAnterior     = golesLocalActual;
+                golesVisitanteAnterior = golesVisitanteActual;
+                marcadorInicializado   = true;
+                return;
+            }
+
+            // Comparar goles del equipo local
+            if (golesLocalActual > golesLocalAnterior) {
+                lanzarAnimacionGol(nombreLocal);
+            }
+
+            // Comparar goles del equipo visitante
+            if (golesVisitanteActual > golesVisitanteAnterior) {
+                lanzarAnimacionGol(nombreVisitante);
+            }
+
+            // Actualizar marcador anterior
+            golesLocalAnterior     = golesLocalActual;
+            golesVisitanteAnterior = golesVisitanteActual;
+        }
+        // =========================================================
+
         async function obtenerMarcadorEnVivo() {
             // CORRECCIÓN: Eliminamos el "GET " y cambiamos "live=all" por "id=PARTIDO_ID"
             const url = `https://v3.football.api-sports.io/fixtures?id=${PARTIDO_ID}`;
@@ -236,17 +425,24 @@
                     document.getElementById('competicion').innerText = traducirCompeticion(partido.league.name, partido.league.round);
 
                     // 2. Datos Local
-                    document.getElementById('nombre-local').innerText = partido.teams.home.name;
+                    const nombreLocal = partido.teams.home.name;
+                    document.getElementById('nombre-local').innerText = nombreLocal;
                     document.getElementById('logo-local').src = partido.teams.home.logo;
                     // Si el partido no ha empezado, el valor de goles es null; lo convertimos a 0
-                    document.getElementById('goles-local').innerText = partido.goals.home !== null ? partido.goals.home : 0;
+                    const golesLocal = partido.goals.home !== null ? partido.goals.home : 0;
+                    document.getElementById('goles-local').innerText = golesLocal;
 
                     // 3. Datos Visitante
-                    document.getElementById('nombre-visitante').innerText = partido.teams.away.name;
+                    const nombreVisitante = partido.teams.away.name;
+                    document.getElementById('nombre-visitante').innerText = nombreVisitante;
                     document.getElementById('logo-visitante').src = partido.teams.away.logo;
-                    document.getElementById('goles-visitante').innerText = partido.goals.away !== null ? partido.goals.away : 0;
+                    const golesVisitante = partido.goals.away !== null ? partido.goals.away : 0;
+                    document.getElementById('goles-visitante').innerText = golesVisitante;
 
-                    // 4. Tiempo y Estado del partido
+                    // 4-bis. Detectar si hubo gol comparando con el marcador anterior
+                    detectarGol(golesLocal, golesVisitante, nombreLocal, nombreVisitante);
+
+                    // 5. Tiempo y Estado del partido
                     const estado = partido.fixture.status.short; // FT, 1H, 2H, HT, NS, etc.
                     const tiempoActual = partido.fixture.status.elapsed; // Minuto actual
 
@@ -294,8 +490,8 @@
         // Ejecutar inmediatamente al cargar la página
         obtenerMarcadorEnVivo();
 
-        // Actualizar automáticamente cada 60 segundos
-        setInterval(obtenerMarcadorEnVivo, 60000);
+        // Actualizar automáticamente según el intervalo configurado
+        setInterval(obtenerMarcadorEnVivo, INTERVALO_ACTUALIZACION);
     </script>
 </body>
 
