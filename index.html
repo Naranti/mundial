@@ -243,7 +243,10 @@
         // ================= CONFIGURACIÓN DE TU API =================
         const API_KEY = "692ff3dbfba2a4ddb2f7945f8f050ee5"; // Tu llave de API-Sports
         const PARTIDO_ID = "1489388";                       // ID del partido que quieres monitorear
-        const INTERVALO_ACTUALIZACION = 15000;               // Intervalo de actualización en milisegundos
+        const INTERVALO_PREVIO_PARTIDO = 300000;             // 5 minutos antes de empezar
+        const INTERVALO_EN_VIVO = 30000;                     // 30 segundos en vivo
+        const INTERVALO_FINALIZADO = 600000;                 // 10 minutos finalizado
+        let intervaloActual = INTERVALO_PREVIO_PARTIDO;
         // ===========================================================
 
         // ================= VARIABLES PARA DETECCIÓN DE GOLES =================
@@ -429,6 +432,29 @@
                     document.getElementById('nombre-local').innerText = nombreLocal;
                     document.getElementById('logo-local').src = partido.teams.home.logo;
                     const estado = partido.fixture.status.short;
+                    if (estado === "NS" || estado === "TBD") {
+                        intervaloActual = INTERVALO_PREVIO_PARTIDO;
+                    } else if (
+                        estado === "1H" ||
+                        estado === "2H" ||
+                        estado === "HT" ||
+                        estado === "ET" ||
+                        estado === "BT" ||
+                        estado === "P" ||
+                        estado === "SUSP" ||
+                        estado === "INT"
+                    ) {
+                        intervaloActual = INTERVALO_EN_VIVO;
+                    } else if (
+                        estado === "FT" ||
+                        estado === "AET" ||
+                        estado === "PEN"
+                    ) {
+                        intervaloActual = INTERVALO_FINALIZADO;
+                    } else {
+                        intervaloActual = INTERVALO_PREVIO_PARTIDO;
+                    }
+
                     const partidoConMarcador = [
                         "1H",
                         "2H",
@@ -509,11 +535,12 @@
             }
         }
 
-        // Ejecutar inmediatamente al cargar la página
-        obtenerMarcadorEnVivo();
+        async function iniciarActualizacionDinamica() {
+            await obtenerMarcadorEnVivo();
+            setTimeout(iniciarActualizacionDinamica, intervaloActual);
+        }
 
-        // Actualizar automáticamente según el intervalo configurado
-        setInterval(obtenerMarcadorEnVivo, INTERVALO_ACTUALIZACION);
+        iniciarActualizacionDinamica();
     </script>
 </body>
 
