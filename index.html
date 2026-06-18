@@ -428,22 +428,44 @@
                     const nombreLocal = partido.teams.home.name;
                     document.getElementById('nombre-local').innerText = nombreLocal;
                     document.getElementById('logo-local').src = partido.teams.home.logo;
-                    // Si el partido no ha empezado, el valor de goles es null; lo convertimos a 0
-                    const golesLocal = partido.goals.home !== null ? partido.goals.home : 0;
-                    document.getElementById('goles-local').innerText = golesLocal;
+                    const estado = partido.fixture.status.short;
+                    const partidoConMarcador = [
+                        "1H",
+                        "2H",
+                        "HT",
+                        "ET",
+                        "BT",
+                        "P",
+                        "SUSP",
+                        "INT",
+                        "FT",
+                        "AET",
+                        "PEN"
+                    ].includes(estado);
 
                     // 3. Datos Visitante
                     const nombreVisitante = partido.teams.away.name;
                     document.getElementById('nombre-visitante').innerText = nombreVisitante;
                     document.getElementById('logo-visitante').src = partido.teams.away.logo;
-                    const golesVisitante = partido.goals.away !== null ? partido.goals.away : 0;
-                    document.getElementById('goles-visitante').innerText = golesVisitante;
+                    if (partidoConMarcador) {
+                        const golesLocalMostrar = partido.goals.home !== null ? partido.goals.home : 0;
+                        const golesVisitanteMostrar = partido.goals.away !== null ? partido.goals.away : 0;
 
-                    // 4-bis. Detectar si hubo gol comparando con el marcador anterior
-                    detectarGol(golesLocal, golesVisitante, nombreLocal, nombreVisitante);
+                        document.getElementById('goles-local').innerText = golesLocalMostrar;
+                        document.getElementById('goles-visitante').innerText = golesVisitanteMostrar;
+
+                        // 4-bis. Detectar si hubo gol comparando con el marcador anterior
+                        detectarGol(golesLocalMostrar, golesVisitanteMostrar, nombreLocal, nombreVisitante);
+                    } else {
+                        document.getElementById('goles-local').innerText = "-";
+                        document.getElementById('goles-visitante').innerText = "-";
+
+                        marcadorInicializado = false;
+                        golesLocalAnterior = null;
+                        golesVisitanteAnterior = null;
+                    }
 
                     // 5. Tiempo y Estado del partido
-                    const estado = partido.fixture.status.short; // FT, 1H, 2H, HT, NS, etc.
                     const tiempoActual = partido.fixture.status.elapsed; // Minuto actual
 
                     const tiempoElemento = document.getElementById('tiempo-partido');
