@@ -60,7 +60,7 @@
 
         .escudo {
             width: auto;
-            height: min(40vh, 100%);
+            height: min(48vh, 100%);
             object-fit: contain;
             margin-bottom: 3vh;
             filter: drop-shadow(0 0 1.2vh white);
@@ -321,6 +321,17 @@
             return `${ligaTraducida} - ${rondaTraducida}`;
         }
 
+        function traducirNombreEquipo(nombreEquipo) {
+            if (!nombreEquipo) return "";
+
+            const traduccionesEquipos = {
+                "england": "Inglaterra"
+            };
+
+            const clave = String(nombreEquipo).trim().toLowerCase();
+            return traduccionesEquipos[clave] || nombreEquipo;
+        }
+
         // ================= FUNCIÓN: LANZAR ANIMACIÓN DE GOL =================
         /**
          * Muestra el overlay de gol con el nombre del equipo que anotó
@@ -476,7 +487,7 @@
                     ].includes(estado);
 
                     // 3. Datos Visitante
-                    const nombreVisitante = partido.teams.away.name;
+                    const nombreVisitante = traducirNombreEquipo(partido.teams.away.name);
                     document.getElementById('nombre-visitante').innerText = nombreVisitante;
                     document.getElementById('logo-visitante').src = partido.teams.away.logo;
                     if (partidoConMarcador) {
